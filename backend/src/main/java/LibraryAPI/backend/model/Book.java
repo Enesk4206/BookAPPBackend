@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +23,6 @@ public class Book {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String author;
     private int year;
     private int numberOfPages;
     private double price;
@@ -34,4 +34,8 @@ public class Book {
         inverseJoinColumns=@JoinColumn(name="genre_id")
     )
     private Set<Genre> genres;
+
+    @ManyToOne
+    private Author author;
+
 }
