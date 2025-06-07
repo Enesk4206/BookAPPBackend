@@ -3,6 +3,8 @@ package LibraryAPI.backend.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,7 +28,7 @@ public class SecurityConfig {
         .csrf(csrf ->csrf.disable())
         .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth").permitAll()
+            .requestMatchers("/api/auth/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/book/**").hasAnyRole("ADMIN,USER")
             .requestMatchers(HttpMethod.POST, "/api/book/**").hasAnyRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/book/**").hasAnyRole("ADMIN")
@@ -46,5 +48,15 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception{
+        return http
+        .getSharedObject(AuthenticationManagerBuilder.class)
+        .userDetailsService(customUserService)
+        .passwordEncoder(passwordEncoder())
+        .and()
+        .build();
     }
 }
