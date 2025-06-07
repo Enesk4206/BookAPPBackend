@@ -38,4 +38,13 @@ public class Book {
     @ManyToOne
     private Author author;
 
+    public void addGenre(Genre genre){
+        this.genres.add(genre);
+        genre.getBooks().add(this);
+    }
+    public void deleteGenre(Genre genre){
+        this.genres.remove(genre);
+        genre.getBooks().remove(this);
+    }
+
 }

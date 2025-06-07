@@ -14,45 +14,45 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import LibraryAPI.backend.dto.AuthorRequest;
-import LibraryAPI.backend.service.AuthorService;
+import LibraryAPI.backend.dto.BookRequest;
+import LibraryAPI.backend.service.BookService;
 import lombok.RequiredArgsConstructor;
 
 @CrossOrigin(origins="http://localhost:5173")
 @RestController
-@RequestMapping("/api/author")
+@RequestMapping("/api/book")
 @RequiredArgsConstructor
-public class AuthorController {
-    private final AuthorService authorService;
+public class BookContreoller {
+    private final BookService bookService;
 
     @PostMapping("/create")
-    public ResponseEntity<AuthorRequest> createAPI(@RequestBody AuthorRequest request){
+    public ResponseEntity<BookRequest> createAPI(@RequestBody BookRequest request){
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(authorService.create(request));
+            return ResponseEntity.status(HttpStatus.CREATED).body(bookService.create(request));
         } catch (Exception e) {
             throw new RuntimeException("INTERNAL SERVER ERROR"+e.getMessage());
         }
     }
     @PutMapping("/update/{id}")
-    public ResponseEntity<AuthorRequest> updateAPI(@PathVariable Long id, @RequestBody AuthorRequest request){
+    public ResponseEntity<BookRequest> updateAPI(@PathVariable Long id, @RequestBody BookRequest request){
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(authorService.update(id,request));
+            return ResponseEntity.status(HttpStatus.OK).body(bookService.update(id,request));
         } catch (Exception e) {
             throw new RuntimeException("INTERNAL SERVER ERROR"+e.getMessage());
         }
     }
-    @GetMapping("/all-authors")
-    public ResponseEntity<List<AuthorRequest>> listAPI(){
+    @GetMapping("/all-books")
+    public ResponseEntity<List<BookRequest>> listAPI(){
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(authorService.getAllAuthors());
+            return ResponseEntity.status(HttpStatus.OK).body(bookService.getAllBooks());
         } catch (Exception e) {
             throw new RuntimeException("INTERNAL SERVER ERROR"+e.getMessage());
         }
     }
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<AuthorRequest> createAPI(Long id){
+    public ResponseEntity<BookRequest> createAPI(Long id){
         try {
-            authorService.delete(id);
+            bookService.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (Exception e) {
             throw new RuntimeException("INTERNAL SERVER ERROR"+e.getMessage());
