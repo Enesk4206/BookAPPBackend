@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Delius&family=Edu+NSW+ACT+Hand+Pre:wght@400..700&display=swap');
+
+
+body {
+  @apply bg-gray-100;
+  /* veya daha koyu istersen bg-gray-100 */
+}
+
+
+.font-handwritten {
+    font-family: "Edu NSW ACT Hand Pre", cursive;
+}
+.font-headerText{
+    font-family: "Cinzel", serif;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 40s linear infinite;
+}

@@ -50,7 +50,7 @@ public class BookContreoller {
         }
     }
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<BookRequest> createAPI(Long id){
+    public ResponseEntity<BookRequest> createAPI(@PathVariable Long id){
         try {
             bookService.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

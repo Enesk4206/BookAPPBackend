@@ -30,7 +30,7 @@ public class AuthorService {
                 saved.getName()
             );
         }catch(RuntimeException e){
-            throw new RuntimeException("Error in Author create methode");
+            throw new RuntimeException(e.getMessage(),e);
         }
     }
 

@@ -68,7 +68,7 @@ public class BookService {
                 saved.getGenres().stream().map(Genre::getName).collect(Collectors.toSet())
             );
         }catch(RuntimeException e){
-            throw new RuntimeException("Error in Book create methode");
+            throw new RuntimeException("Error in Book create methode" + e.getMessage());
         }
     }
 
@@ -93,39 +93,50 @@ public class BookService {
         }
     }
 
-   public BookRequest update(Long id,BookRequest request){
-
-       try {
-
+   public BookRequest update(Long id, BookRequest request) {
+        try {
             Book existsBook = bookRepository.findById(id).orElseThrow(
-            () -> new RuntimeException("Book not found id: "+ id)
+                () -> new RuntimeException("Book not found id: " + id)
             );
 
-            if(bookRepository.existsByName(request.getName())){
-                throw new RuntimeException("This Book has already exists "+request.getName());
-            }
-
-            // Genre eşleme ve ekleme (kısa hali)
+            // Tüm genre'ları getir ve isim eşleştir
             Set<Genre> allGenres = new HashSet<>(genreRepository.findAll());
-            Set<Genre> genres = allGenres.stream()
+            Set<Genre> requestedGenres = allGenres.stream()
                 .filter(g -> request.getGenres().contains(g.getName()))
                 .collect(Collectors.toSet());
 
-            if (genres.size() != request.getGenres().size()) {
+            if (requestedGenres.size() != request.getGenres().size()) {
                 throw new RuntimeException("Some Genre(s) were not found!");
             }
-            
+
+            // 1. Eksik genre'ları sil
+            Set<Genre> currentGenres = new HashSet<>(existsBook.getGenres());
+            for (Genre genre : currentGenres) {
+                if (!request.getGenres().contains(genre.getName())) {
+                    existsBook.deleteGenre(genre);
+                }
+            }
+
+            // 2. Yeni genre'ları ekle
+            for (Genre genre : requestedGenres) {
+                if (!existsBook.getGenres().contains(genre)) {
+                    existsBook.addGenre(genre);
+                }
+            }
+
+            // Diğer alanlar
             existsBook.setName(request.getName());
             existsBook.setNumberOfPages(request.getNumberOfPages());
             existsBook.setPrice(request.getPrice());
             existsBook.setYear(request.getYear());
-            //add author in the book
+
+            // Author güncelle
             Author existsAuthor = authorRepository.findByName(request.getAuthor()).orElseThrow(
-                () ->  new RuntimeException("The Author doesn't exist to add book! "+request.getName())
+                () -> new RuntimeException("The Author doesn't exist to add book! " + request.getName())
             );
             existsBook.setAuthor(existsAuthor);
-            genres.forEach(existsBook::addGenre);
 
+            // Kaydet
             Book updated = bookRepository.save(existsBook);
             return new BookRequest(
                 updated.getId(),
@@ -137,10 +148,11 @@ public class BookService {
                 updated.getGenres().stream().map(Genre::getName).collect(Collectors.toSet())
             );
 
-       } catch(RuntimeException e){
-            throw new RuntimeException("Error in Book update methode");
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error in Book update methode: " + e.getMessage(), e);
         }
     }
+
 
     public String delete(Long id) {
         try {

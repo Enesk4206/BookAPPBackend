@@ -50,7 +50,7 @@ public class AuthorController {
         }
     }
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<AuthorRequest> createAPI(Long id){
+    public ResponseEntity<AuthorRequest> createAPI(@PathVariable  Long id){
         try {
             authorService.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

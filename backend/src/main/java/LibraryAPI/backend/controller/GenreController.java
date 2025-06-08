@@ -41,7 +41,7 @@ public class GenreController {
             throw new RuntimeException("INTERNAL SERVER ERROR"+e.getMessage());
         }
     }
-    @GetMapping("/all-books")
+    @GetMapping("/all-genres")
     public ResponseEntity<List<GenreRequest>> listAPI(){
         try {
             return ResponseEntity.status(HttpStatus.OK).body(genreService.getAllGenres());
@@ -50,7 +50,7 @@ public class GenreController {
         }
     }
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<GenreRequest> createAPI(Long id){
+    public ResponseEntity<GenreRequest> createAPI(@PathVariable Long id){
         try {
             genreService.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

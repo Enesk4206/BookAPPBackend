@@ -1,5 +1,6 @@
 package LibraryAPI.backend.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Entity;
@@ -33,7 +34,7 @@ public class Book {
         joinColumns= @JoinColumn(name="book_id"),
         inverseJoinColumns=@JoinColumn(name="genre_id")
     )
-    private Set<Genre> genres;
+    private Set<Genre> genres = new HashSet<>();
 
     @ManyToOne
     private Author author;
