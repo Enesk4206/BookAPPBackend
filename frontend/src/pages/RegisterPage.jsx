@@ -1,24 +1,33 @@
-// RegisterPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const { register } = useAuth();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: API çağrısı yapılacak
-    alert(`Kayıt yapıldı: ${username} - ${email}`);
-    // Kayıt sonrası login sayfasına yönlendirme
-    navigate('/login');
+    setError('');
+
+    try {
+      await register({ username, email, password });
+      alert('Kayıt başarılı! Giriş yapılıyor...');
+      navigate('/'); // kayıt sonrası anasayfaya yönlendir
+    } catch (err) {
+      setError(err.message || 'Kayıt işlemi başarısız oldu');
+    }
   };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-md">
       <h2 className="text-3xl font-bold mb-6">Kayıt Ol</h2>
+      {error && <div className="text-red-600 mb-4">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"

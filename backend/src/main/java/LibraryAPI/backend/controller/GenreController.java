@@ -50,7 +50,7 @@ public class GenreController {
         }
     }
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<GenreRequest> createAPI(@PathVariable Long id){
+    public ResponseEntity<Void> createAPI(@PathVariable Long id){
         try {
             genreService.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

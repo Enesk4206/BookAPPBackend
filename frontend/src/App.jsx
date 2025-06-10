@@ -12,6 +12,10 @@ import Footer from "./components/Footer"
 import BookDetailsPage from './pages/Book/BookDetailsPage'
 import CartPage from './pages/CartPage'
 import AuthorDetailsPage from './pages/Book/AuthorDetailsPage'
+import AdminDashboardPage from './admin/AdminDashboardPage'
+import AdminBooksPage from './admin/AdminBooksPage'
+import AdminAuthorsPage from './admin/AdminAuthorsPage'
+import AdminGenresPage from './admin/AdminGenresPage'
 
 const App = () => {
   //flex-grow:
@@ -33,6 +37,11 @@ const App = () => {
             <Route path='/all-authors' element={<AuthorPage/>}/>
             <Route path='/author-details/:authorId' element={<AuthorDetailsPage/>}/>
             <Route path='/cart' element={<CartPage/>}/>
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/books" element={<AdminBooksPage />} />
+            <Route path="/admin/authors" element={<AdminAuthorsPage />} />
+            <Route path="/admin/genres" element={<AdminGenresPage />} />
+
           </Routes>
         </main>
         <Footer/>

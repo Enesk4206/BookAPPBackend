@@ -1,23 +1,31 @@
 // LoginPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // ✅ Context'ten çek
+// NOT: authService'ten login'i import ETME!
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ Context kullanımı
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Burada API çağrısı yapılabilir
-    alert(`Giriş yapıldı: ${username}`);
-    // Başarılı giriş sonrası anasayfa veya başka sayfaya yönlendirme
-    navigate('/');
+    try {
+      await login({ username, password }); // ✅ Context içindeki login
+      navigate('/');
+    } catch (err) {
+      setError(err.message || 'Giriş Hatası');
+    }
   };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-md">
       <h2 className="text-3xl font-bold mb-6">Giriş Yap</h2>
+      {error && <div className="text-red-600">{error}</div>}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"

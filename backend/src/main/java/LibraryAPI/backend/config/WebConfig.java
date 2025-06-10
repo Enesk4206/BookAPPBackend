@@ -19,5 +19,8 @@ public class WebConfig implements WebMvcConfigurer {
         String absolutePath = Paths.get(uplaodDir).toAbsolutePath().toUri().toString();
         registery.addResourceHandler("/book-images/**").addResourceLocations(absolutePath);
     }
+
+
+    
     
 }

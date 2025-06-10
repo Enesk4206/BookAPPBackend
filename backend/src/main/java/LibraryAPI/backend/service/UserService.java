@@ -8,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import LibraryAPI.backend.dto.LoginRequest;
+import LibraryAPI.backend.dto.LoginResponse;
+import LibraryAPI.backend.dto.ProfileResponse;
 import LibraryAPI.backend.dto.RegisterRequest;
 import LibraryAPI.backend.model.Role;
 import LibraryAPI.backend.model.User;
@@ -56,7 +58,7 @@ public class UserService {
         );
     }
 
-    public LoginRequest login(LoginRequest request){
+    public LoginResponse login(LoginRequest request){
         try {
             Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -65,15 +67,41 @@ public class UserService {
                 )
             );
             UserDetails userDetails = (UserDetails) auth.getPrincipal();
+
+             User user = userRepository.findByUsername(userDetails.getUsername())
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+
             String token = jwtTokenUtil.generateToken(userDetails);
-            return new LoginRequest(
-                userDetails.getUsername(),
-                null,
+             return new LoginResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getRole().name(),
                 token
-            );
+        );
         
         } catch (RuntimeException e) {
             throw new RuntimeException(e.getMessage() +" Error in Userservice Login");
         }
+    }
+
+    public ProfileResponse getProfile(String token){
+
+        if (token != null && token.startsWith("Bearer ")) {
+        token = token.substring(7).trim();
+        }
+
+
+        String username = jwtTokenUtil.extractUsername(token);
+        User user = userRepository.findByUsername(username).orElseThrow(
+            ()->  new RuntimeException("User not found!")
+        );
+        return new ProfileResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getRole().name(),
+            token
+        );
+
     }
 }
