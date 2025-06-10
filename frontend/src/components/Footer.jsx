@@ -8,7 +8,7 @@ const Footer = () => {
 
         {/* Üst - Logo / Site Adı */}
         <div className="text-center mb-4">
-          <h2 className="text-xl font-bold">📚 Kütüphane</h2>
+          <h2 className="text-xl font-bold">📚 LibEasy</h2>
         </div>
 
         {/* Orta - Linkler */}
@@ -22,7 +22,7 @@ const Footer = () => {
 
         {/* Alt - Telif */}
         <div className="text-center text-xs text-gray-400">
-          &copy; {new Date().getFullYear()} Tüm hakları saklıdır. Kütüphane Projesi.
+          &copy; {new Date().getFullYear()} Tüm hakları saklıdır. LibEasy Projesi.
         </div>
 
       </div>

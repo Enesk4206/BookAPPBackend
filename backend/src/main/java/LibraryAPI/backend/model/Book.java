@@ -28,6 +28,8 @@ public class Book {
     private int numberOfPages;
     private double price;
 
+    private String imagePath;
+
     @ManyToMany
     @JoinTable(
         name="book_genres",
@@ -47,5 +49,6 @@ public class Book {
         this.genres.remove(genre);
         genre.getBooks().remove(this);
     }
+
 
 }

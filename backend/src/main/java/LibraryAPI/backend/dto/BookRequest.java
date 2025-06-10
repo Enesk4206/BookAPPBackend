@@ -19,4 +19,5 @@ public class BookRequest {
     private int numberOfPages;
     private double price;
     private Set<String> genres;
+    private String imagePath;
 }
