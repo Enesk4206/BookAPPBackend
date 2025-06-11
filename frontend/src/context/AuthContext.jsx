@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getProfile, login as loginService, register as registerService } from '../api/authService';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -17,11 +19,25 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
           localStorage.removeItem("token");
           setUser(null);
+          navigate("/login");
         }
       }
       setLoading(false); // ✅ loading state tamamlandı
     };
     fetchProfile();
+   // 🔔 JWT expired event listener
+    const handleJwtExpired = () => {
+      localStorage.removeItem("token");
+      setUser(null);
+       navigate("/login");
+
+    };
+
+    window.addEventListener("jwt-expired", handleJwtExpired);
+
+    return () => {
+      window.removeEventListener("jwt-expired", handleJwtExpired);
+    };
   }, []);
 
   const login = async (credentials) => {
@@ -41,6 +57,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    navigate("/login");
+
   };
 
   return (

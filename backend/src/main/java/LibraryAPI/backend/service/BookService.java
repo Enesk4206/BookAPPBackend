@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -37,228 +38,215 @@ public class BookService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    //yardımcı klösörü oluştur 
-    private Path getUploadPath(){
+    private Path getUploadPath() {
         Path path = Paths.get(uploadDir);
         try {
-            if(!Files.exists(path)){
+            if (!Files.exists(path)) {
                 Files.createDirectories(path);
             }
         } catch (IOException e) {
             throw new RuntimeException("Couldn't create upload directory");
         }
         return path;
-    }   
-
-   private String storeImage(MultipartFile file){
-    if(file == null || file.isEmpty()){
-        return null;
     }
-    String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-    String fileExtension = "";
-    int extIndex = originalFilename.lastIndexOf('.');
-    if(extIndex >=0){
-        fileExtension = originalFilename.substring(extIndex);
+
+    private String storeImage(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+        String fileExtension = "";
+        int extIndex = originalFilename.lastIndexOf('.');
+        if (extIndex >= 0) {
+            fileExtension = originalFilename.substring(extIndex);
+        }
+        String filename = UUID.randomUUID().toString() + fileExtension;
+        Path targetPath = getUploadPath().resolve(filename);
+
+        try (InputStream inputStream = file.getInputStream()) {
+            Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file " + filename, e);
+        }
+        return filename;
     }
-    String filename = UUID.randomUUID().toString() + fileExtension;
-    Path targetPath = getUploadPath().resolve(filename);
 
-    System.out.println("Original filename: " + originalFilename);
-    System.out.println("Target path: " + targetPath);
-    System.out.println("Parent directory exists: " + Files.exists(targetPath.getParent()));
-    System.out.println("Parent directory writable: " + Files.isWritable(targetPath.getParent()));
-
-    try (InputStream inputStream = file.getInputStream()) {
-        Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
-    } catch (IOException e) {
-        throw new RuntimeException("Failed to store file " + filename , e);
-    }
-    return filename;
-}
-
-
-
-    public BookRequest create(BookRequest request,MultipartFile imageFile){
-        try{
-            // Kitap kontrol etme
-            if(bookRepository.existsByName(request.getName())){
-                throw new RuntimeException("This Book has already exists "+request.getName());
+    public BookRequest create(BookRequest request, MultipartFile imageFile) {
+        try {
+            if (bookRepository.existsByName(request.getName())) {
+                throw new RuntimeException("This Book already exists: " + request.getName());
             }
 
-            // Kitap türü kontrol etme
-            Set<Genre> genres = request.getGenres().stream()
-                .map(name -> genreRepository.findByName(name)
-                    .orElseThrow(() -> new RuntimeException("Genre bulunamadı: " + name)))
+            // Author by ID
+            Author author = authorRepository.findById(request.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Author not found with id: " + request.getAuthorId()));
+
+            Set<Long> genreIds = request.getGenresId() == null ? Collections.<Long>emptySet() : request.getGenresId();
+            Set<Genre> genres = genreIds.stream()
+                .map(id -> genreRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Genre not found with id: " + id)))
                 .collect(Collectors.toSet());
 
-            //Yazar kontrol etme
-            Author author = authorRepository.findByName(request.getAuthor()).orElseThrow(
-                ()-> new RuntimeException("Yazar bulunamadı!")
-            );
-            
 
-            Book book= new Book();
+
+            Book book = new Book();
             book.setName(request.getName());
             book.setNumberOfPages(request.getNumberOfPages());
             book.setPrice(request.getPrice());
             book.setYear(request.getYear());
-            
-            // author ve kitap kısmına eklemeleri yap
+
+            // associate author and book
             author.addBook(book);
-            //eklenen genreler
+
+            // add genres
             genres.forEach(book::addGenre);
 
-            //resim kaydetme
+            // save image
             String savedFilename = storeImage(imageFile);
-            if(savedFilename != null){
+            if (savedFilename != null) {
                 book.setImagePath(savedFilename);
             }
 
             Book saved = bookRepository.save(book);
+
             String imageUrl = saved.getImagePath() != null ? "/book-images/" + saved.getImagePath() : null;
+
             return new BookRequest(
                 saved.getId(),
                 saved.getName(),
-                saved.getAuthor().getName(),
+                saved.getAuthor().getId(),
                 saved.getYear(),
                 saved.getNumberOfPages(),
                 saved.getPrice(),
-                saved.getGenres().stream().map(Genre::getName).collect(Collectors.toSet()),
+                saved.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()),
                 imageUrl
             );
-        }catch(RuntimeException e){
-            throw new RuntimeException("Error in Book create methode" + e.getMessage());
+
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error in Book create method: " + e.getMessage(), e);
         }
     }
 
-    public List<BookRequest> getAllBooks(){
-        try{
-        
+    public List<BookRequest> getAllBooks() {
+        try {
             List<Book> books = bookRepository.findAll();
 
-            return books.stream().map(
-                a -> new BookRequest(
-                    a.getId(),
-                    a.getName(),
-                    a.getAuthor().getName(),
-                    a.getYear(),
-                    a.getNumberOfPages(),
-                    a.getPrice(),
-                    a.getGenres().stream().map(Genre::getName).collect(Collectors.toSet()),
-                    a.getImagePath() != null ? "/book-images/" + a.getImagePath() : null
-                )
-            ).collect(Collectors.toList());
-        }catch(RuntimeException e){
-            throw new RuntimeException("Error in Book list methode");
+            return books.stream().map(book -> new BookRequest(
+                book.getId(),
+                book.getName(),
+                book.getAuthor().getId(),
+                book.getYear(),
+                book.getNumberOfPages(),
+                book.getPrice(),
+                book.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()),
+                book.getImagePath() != null ? "/book-images/" + book.getImagePath() : null
+            )).collect(Collectors.toList());
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error in Book list method", e);
         }
     }
 
-   public BookRequest update(Long id, BookRequest request, MultipartFile imageFile) {
+    public BookRequest update(Long id, BookRequest request, MultipartFile imageFile) {
         try {
-            Book existsBook = bookRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Book not found id: " + id)
+            Book existsBook = bookRepository.findById(id).orElseThrow(() ->
+                new RuntimeException("Book not found with id: " + id)
             );
 
-            // Tüm genre'ları getir ve isim eşleştir
+            // Fetch genres by IDs
             Set<Genre> allGenres = new HashSet<>(genreRepository.findAll());
             Set<Genre> requestedGenres = allGenres.stream()
-                .filter(g -> request.getGenres().contains(g.getName()))
+                .filter(g -> request.getGenresId().contains(g.getId()))
                 .collect(Collectors.toSet());
 
-            if (requestedGenres.size() != request.getGenres().size()) {
+            if (requestedGenres.size() != request.getGenresId().size()) {
                 throw new RuntimeException("Some Genre(s) were not found!");
             }
 
-            // 1. Eksik genre'ları sil
+            // Remove genres not requested
             Set<Genre> currentGenres = new HashSet<>(existsBook.getGenres());
             for (Genre genre : currentGenres) {
-                if (!request.getGenres().contains(genre.getName())) {
+                if (!request.getGenresId().contains(genre.getId())) {
                     existsBook.deleteGenre(genre);
                 }
             }
 
-            // 2. Yeni genre'ları ekle
+            // Add new genres
             for (Genre genre : requestedGenres) {
                 if (!existsBook.getGenres().contains(genre)) {
                     existsBook.addGenre(genre);
                 }
             }
 
-            // Diğer alanlar
+            // Update other fields
             existsBook.setName(request.getName());
             existsBook.setNumberOfPages(request.getNumberOfPages());
             existsBook.setPrice(request.getPrice());
             existsBook.setYear(request.getYear());
 
-            // Author güncelle
-            Author existsAuthor = authorRepository.findByName(request.getAuthor()).orElseThrow(
-                () -> new RuntimeException("The Author doesn't exist to add book! " + request.getName())
-            );
+            // Update author by ID
+            Author existsAuthor = authorRepository.findById(request.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Author not found with id: " + request.getAuthorId()));
+
             existsBook.setAuthor(existsAuthor);
 
-
-            if(imageFile != null ||!imageFile.isEmpty()){
-                if(existsBook.getImagePath() != null){
+            // Handle image update
+            if (imageFile != null && !imageFile.isEmpty()) {
+                if (existsBook.getImagePath() != null) {
                     Path oldPath = getUploadPath().resolve(existsBook.getImagePath());
-                    try{
+                    try {
                         Files.deleteIfExists(oldPath);
-                    }catch(IOException ignored){
-
-                    }
-                    String newFilename = storeImage(imageFile);
-                    existsBook.setImagePath(newFilename);
+                    } catch (IOException ignored) {}
                 }
+                String newFilename = storeImage(imageFile);
+                existsBook.setImagePath(newFilename);
             }
 
-            // Kaydet
             Book updated = bookRepository.save(existsBook);
+
             String imageUrl = updated.getImagePath() != null ? "/book-images/" + updated.getImagePath() : null;
+
             return new BookRequest(
                 updated.getId(),
                 updated.getName(),
-                updated.getAuthor().getName(),
+                updated.getAuthor().getId(),
                 updated.getYear(),
                 updated.getNumberOfPages(),
                 updated.getPrice(),
-                updated.getGenres().stream().map(Genre::getName).collect(Collectors.toSet()),
+                updated.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()),
                 imageUrl
             );
-
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error in Book update methode: " + e.getMessage(), e);
+            throw new RuntimeException("Error in Book update method: " + e.getMessage(), e);
         }
     }
 
-
     public String delete(Long id) {
         try {
-            Book existsBook = bookRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Book not found id: " + id)
+            Book existsBook = bookRepository.findById(id).orElseThrow(() ->
+                new RuntimeException("Book not found with id: " + id)
             );
 
-            // Burada direkt modeldeki fonksiyonu kullanıyoruz
-            for (Genre genre : new HashSet<>(existsBook.getGenres())) { 
+            for (Genre genre : new HashSet<>(existsBook.getGenres())) {
                 existsBook.deleteGenre(genre);
             }
 
             Author author = existsBook.getAuthor();
-            if(author != null){
+            if (author != null) {
                 author.getBooks().remove(existsBook);
                 existsBook.setAuthor(null);
             }
 
-            if(existsBook.getImagePath() !=null || !existsBook.getImagePath().isEmpty()){
+            if (existsBook.getImagePath() != null && !existsBook.getImagePath().isEmpty()) {
                 Path oldPath = getUploadPath().resolve(existsBook.getImagePath());
                 try {
-                    Files.deleteIfExists(oldPath);  
-                } catch (IOException ignored) {
-                }
+                    Files.deleteIfExists(oldPath);
+                } catch (IOException ignored) {}
             }
 
             bookRepository.delete(existsBook);
             return "Book deleted successfully id: " + id;
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error in Book delete method");
+            throw new RuntimeException("Error in Book delete method", e);
         }
     }
 }

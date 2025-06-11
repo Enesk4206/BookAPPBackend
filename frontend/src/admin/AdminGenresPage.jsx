@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
-import { createGenre, updateGenre, deleteGenre, getAllGenres } from '../api/genreService.js';
+import {
+  createGenre,
+  updateGenre,
+  deleteGenre,
+  getAllGenres,
+} from '../api/genreService.js';
 
 const AdminGenresPage = () => {
   const [genres, setGenres] = useState([]);
@@ -59,7 +64,7 @@ const AdminGenresPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Bu genreyı silmek istediğinize emin misiniz?')) return;
+    if (!window.confirm('Bu türü silmek istediğinize emin misiniz?')) return;
     try {
       await deleteGenre(id);
       setGenres(prev => prev.filter(g => g.id !== id));
@@ -71,20 +76,20 @@ const AdminGenresPage = () => {
   return (
     <AdminLayout>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Genre Yönetimi</h1>
+        <h1 className="text-3xl font-semibold mb-6 text-gray-800">🎭 Tür Yönetimi</h1>
 
         {/* Yeni Genre Ekleme */}
-        <div className="mb-6 flex gap-2">
+        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-2">
           <input
             type="text"
-            placeholder="Yeni genre adı"
+            placeholder="Yeni tür adı"
             value={newGenreName}
             onChange={(e) => setNewGenreName(e.target.value)}
-            className="border rounded px-3 py-2 flex-grow"
+            className="border border-gray-300 rounded px-4 py-2 w-full sm:w-64"
           />
           <button
             onClick={handleCreate}
-            className="bg-green-600 text-white px-4 rounded hover:bg-green-700 transition"
+            className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
           >
             Ekle
           </button>
@@ -92,72 +97,74 @@ const AdminGenresPage = () => {
 
         {/* Genre Tablosu */}
         {loading ? (
-          <div>Yükleniyor...</div>
+          <div className="text-gray-600">Yükleniyor...</div>
         ) : (
-          <table className="min-w-full bg-white border border-gray-300 rounded">
-            <thead>
-              <tr>
-                <th className="py-2 px-4 border-b">ID</th>
-                <th className="py-2 px-4 border-b">Ad</th>
-                <th className="py-2 px-4 border-b">İşlemler</th>
-              </tr>
-            </thead>
-            <tbody>
-              {genres.map((genre) => (
-                <tr key={genre.id} className="hover:bg-gray-100">
-                  <td className="py-2 px-4 border-b">{genre.id}</td>
-                  <td className="py-2 px-4 border-b">
-                    {editGenreId === genre.id ? (
-                      <input
-                        type="text"
-                        value={editGenreName}
-                        onChange={(e) => setEditGenreName(e.target.value)}
-                        className="border rounded px-2 py-1 w-full"
-                      />
-                    ) : (
-                      genre.name
-                    )}
-                  </td>
-                  <td className="py-2 px-4 border-b space-x-2">
-                    {editGenreId === genre.id ? (
-                      <>
-                        <button
-                          onClick={() => handleUpdate(genre.id)}
-                          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-                        >
-                          Kaydet
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditGenreId(null);
-                            setEditGenreName('');
-                          }}
-                          className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500 transition"
-                        >
-                          İptal
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleEditClick(genre)}
-                          className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 transition"
-                        >
-                          Düzenle
-                        </button>
-                        <button
-                          onClick={() => handleDelete(genre.id)}
-                          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-                        >
-                          Sil
-                        </button>
-                      </>
-                    )}
-                  </td>
+          <div className="overflow-x-auto rounded shadow">
+            <table className="min-w-full bg-white border border-gray-200 text-sm">
+              <thead className="bg-gray-100 text-gray-700 uppercase text-xs tracking-wider">
+                <tr>
+                  <th className="px-6 py-3 text-left">ID</th>
+                  <th className="px-6 py-3 text-left">Ad</th>
+                  <th className="px-6 py-3 text-left">İşlemler</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {genres.map((genre) => (
+                  <tr key={genre.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 font-medium text-gray-800">{genre.id}</td>
+                    <td className="px-6 py-4">
+                      {editGenreId === genre.id ? (
+                        <input
+                          type="text"
+                          value={editGenreName}
+                          onChange={(e) => setEditGenreName(e.target.value)}
+                          className="border border-gray-300 rounded px-2 py-1 w-full"
+                        />
+                      ) : (
+                        genre.name
+                      )}
+                    </td>
+                    <td className="px-6 py-4 space-x-2">
+                      {editGenreId === genre.id ? (
+                        <>
+                          <button
+                            onClick={() => handleUpdate(genre.id)}
+                            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                          >
+                            Kaydet
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditGenreId(null);
+                              setEditGenreName('');
+                            }}
+                            className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500 transition"
+                          >
+                            İptal
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleEditClick(genre)}
+                            className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
+                          >
+                            Düzenle
+                          </button>
+                          <button
+                            onClick={() => handleDelete(genre.id)}
+                            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                          >
+                            Sil
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </AdminLayout>

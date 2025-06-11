@@ -1,5 +1,5 @@
 import React from 'react'
-import {BrowserRouter as Router, Routes, Route} from "react-router-dom"
+import {Routes, Route} from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import AboutPage from "./pages/AboutPage"
 import ContactPage from "./pages/ContactPage"
@@ -16,13 +16,14 @@ import AdminDashboardPage from './admin/AdminDashboardPage'
 import AdminBooksPage from './admin/AdminBooksPage'
 import AdminAuthorsPage from './admin/AdminAuthorsPage'
 import AdminGenresPage from './admin/AdminGenresPage'
+import AdminBookAddPage from './admin/AdminBookAddPage'
+import AdminBookDetails from './admin/AdminBookDetails'
 
 const App = () => {
   //flex-grow:
   //container:
 
   return (
-    <Router>
       <div className='flex flex-col min-h-screen'>
         <Navbar/>
         <main className='flex-grow container mx-auto px-4 py-6'>
@@ -39,6 +40,8 @@ const App = () => {
             <Route path='/cart' element={<CartPage/>}/>
             <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
             <Route path="/admin/books" element={<AdminBooksPage />} />
+            <Route path="/admin/book/create" element={<AdminBookAddPage />} />
+            <Route path="/admin/book/details/:id" element={<AdminBookDetails />} />
             <Route path="/admin/authors" element={<AdminAuthorsPage />} />
             <Route path="/admin/genres" element={<AdminGenresPage />} />
 
@@ -46,7 +49,6 @@ const App = () => {
         </main>
         <Footer/>
       </div>
-    </Router>
   )
 }
 

@@ -14,10 +14,10 @@ import lombok.Setter;
 public class BookRequest {
     private Long id;
     private String name;
-    private String author;
+    private Long authorId;
     private int year;
     private int numberOfPages;
     private double price;
-    private Set<String> genres;
+    private Set<Long> genresId;
     private String imagePath;
 }

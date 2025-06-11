@@ -24,8 +24,8 @@ const AdminLayout = ({ children }) => {
       path: '/admin/books',
       icon: <FiBook className="mr-3" />,
       subItems: [
-        { name: 'Tüm Kitaplar', path: '/admin/books/all' },
-        { name: 'Yeni Ekle', path: '/admin/books/new' }
+        { name: 'Tüm Kitaplar', path: '/admin/books' },
+        { name: 'Yeni Ekle', path: '/admin/book/create' }
       ]
     },
     {
