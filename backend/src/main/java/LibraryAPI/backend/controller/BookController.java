@@ -41,7 +41,7 @@ public class BookController {
     public ResponseEntity<BookRequest> updateAPI(
         @PathVariable Long id, 
         @RequestPart("request") BookRequest request, 
-        @RequestPart("imageFile") MultipartFile imageFile){
+        @RequestPart(value="imageFile", required=false) MultipartFile imageFile){
         try {
             return ResponseEntity.status(HttpStatus.OK).body(bookService.update(id,request,imageFile));
         } catch (Exception e) {

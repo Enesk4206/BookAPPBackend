@@ -6,6 +6,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +32,7 @@ public class SecurityConfig {
         .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/book-images/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/book/**").hasAnyRole("ADMIN","USER")
             .requestMatchers(HttpMethod.POST, "/api/book/**").hasAnyRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/book/**").hasAnyRole("ADMIN")
@@ -65,4 +67,9 @@ public class SecurityConfig {
         .and()
         .build();
     }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/book-images/**");
+    }
+    
 }

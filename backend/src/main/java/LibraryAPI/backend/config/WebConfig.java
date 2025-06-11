@@ -11,16 +11,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     @Value("${file.upload-dir}")
-    private String uplaodDir;
+    private String uploadDir; // Doğru isim
 
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registery){
-        
-        String absolutePath = Paths.get(uplaodDir).toAbsolutePath().toUri().toString();
-        registery.addResourceHandler("/book-images/**").addResourceLocations(absolutePath);
+    public void addResourceHandlers(ResourceHandlerRegistry registry){ // Doğru parametre ismi
+        String absolutePath = "file:" + Paths.get(uploadDir).toAbsolutePath().toString() + "/";
+        registry.addResourceHandler("/book-images/**")
+                .addResourceLocations(absolutePath);
     }
-
-
-    
-    
 }
+

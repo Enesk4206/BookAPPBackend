@@ -15,7 +15,12 @@ export const createBook = async(formData)=>{
     return response.data;
 }
 export const updateBook = async(id,book)=>{
-    const response = await api.put(`/book/update/${id}`,book);
+    const response = await api.put(`/book/update/${id}`,book,{
+        headers:{
+            'Content-Type':'multipart/form-data',
+        }
+        
+    });
     return response.data;
 }
 export const deleteBook = async(id)=>{
